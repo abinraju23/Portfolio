@@ -286,7 +286,8 @@
   .game-overlay {
     position: absolute; inset: 0; border-radius: 10px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;
-    background: rgba(7,7,12,0.78); backdrop-filter: blur(4px); text-align: center; padding: 1rem;
+    background: rgba(7,7,12,0.92); backdrop-filter: blur(6px); text-align: center; padding: 1.5rem;
+    /* overlay sits inside canvas-shell only, not over the topbar */
   }
   .game-overlay.hidden { display: none; }
   .game-overlay h3 { font-family: 'Syne', sans-serif; font-size: 1.6rem; color: var(--text); letter-spacing: -0.02em; }
@@ -391,25 +392,20 @@
     /* FIX 5: Sidebar drawer — correct positioning */
     .nav-links {
       position: fixed;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: auto;
-      width: min(80vw, 300px);
+      top: 0; right: 0; bottom: 0; left: auto;
+      width: min(82vw, 290px);
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
       gap: 0;
-      background: rgba(10,10,16,0.98);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      padding: 5rem 1.75rem 2rem;
+      /* fully solid — no bleed-through */
+      background: #0c0c14;
+      border-left: 1px solid rgba(255,255,255,0.14);
+      padding: 5.5rem 2rem 2.5rem;
       transform: translateX(100%);
-      transition: transform .35s cubic-bezier(.2,.7,.2,1);
-      border-left: 1px solid var(--border);
+      transition: transform .32s cubic-bezier(.2,.7,.2,1);
       z-index: 110;
       list-style: none;
-      /* FIX: ensure full height and no overflow issues */
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
@@ -418,26 +414,29 @@
     .nav-links a {
       display: block;
       width: 100%;
-      padding: 1rem 0;
-      font-size: 1.1rem;
-      border-bottom: 1px solid var(--border);
-      color: var(--muted);
+      padding: 1.1rem 0;
+      font-size: 1.05rem;
+      /* bright white so it's readable */
+      color: #e8e8e0;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+      letter-spacing: 0.02em;
     }
-    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:active { color: var(--accent); }
     .nav-links a.nav-cta {
-      margin-top: 1.5rem;
+      margin-top: 1.75rem;
       text-align: center;
-      border: 1px solid var(--accent);
+      border: 1px solid var(--accent) !important;
       border-radius: 6px;
-      padding: 0.85rem 1rem;
+      padding: 0.9rem 1rem;
       color: var(--accent) !important;
+      font-weight: 500;
     }
     /* Backdrop */
     .nav-backdrop {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.75);
       opacity: 0; pointer-events: none;
-      transition: opacity .35s;
+      transition: opacity .3s;
       z-index: 105;
     }
     .nav-backdrop.open { opacity: 1; pointer-events: auto; }
@@ -483,12 +482,15 @@
 
     /* FIX 7: Game wrapper — tighter on mobile */
     .game-wrap { padding: 0.5rem; border-radius: 12px; }
+    /* reduce canvas render height on mobile for better fit */
+    #game-canvas { max-height: 160px; object-fit: fill; }
     .game-topbar { font-size: 0.62rem; padding: 0.35rem 0.4rem 0.5rem; }
     .game-topbar .scoreboard { gap: 0.75rem; }
     /* hide keyboard hint on mobile */
     .game-overlay .keyhint { display: none; }
-    .game-overlay h3 { font-size: 1.2rem; }
-    .game-overlay p { font-size: 0.82rem; }
+    .game-overlay h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+    .game-overlay p { font-size: 0.78rem; margin-bottom: 0.25rem; }
+    .game-overlay .game-btn { padding: 0.6rem 1.4rem; font-size: 0.85rem; margin-top: 0.25rem; }
     .game-legend { gap: 0.6rem 1rem; font-size: 0.65rem; }
 
     /* FIX 8: Show touch controls on mobile */
@@ -1028,10 +1030,16 @@
   try { best = parseInt(localStorage.getItem('dataRunnerBest') || '0') || 0; } catch (e) {}
   bestEl.textContent = best;
 
-  // Set canvas internal resolution and aspect ratio via CSS
-  canvasEl.width = VW;
-  canvasEl.height = VH;
-  // CSS: width:100% already set — this makes it scale smoothly
+  // Responsive canvas: shrink internal height on mobile for better fit
+  function setCanvasSize() {
+    const isMobile = window.innerWidth < 768;
+    canvasEl.width = VW;
+    canvasEl.height = isMobile ? 180 : VH;
+    // Update GROUND-equivalent via CSS aspect ratio
+    canvasEl.style.aspectRatio = VW + '/' + (isMobile ? 180 : VH);
+  }
+  setCanvasSize();
+  window.addEventListener('resize', setCanvasSize);
 
   const player = { x: 90, y: GROUND, w: 26, h: 26, vy: 0, ducking: false, onGround: true };
   let obstacles = [], bonuses = [], speed = 5, score = 0, frame = 0, running = false, gameOver = false;
