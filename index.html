@@ -258,67 +258,70 @@
   .cert-item { font-size: 0.8rem; padding: 0.4rem 1rem; border: 1px solid rgba(0,229,160,0.2); background: rgba(0,229,160,0.04); border-radius: 20px; color: var(--muted); }
   .cert-item span { color: var(--accent); font-weight: 500; }
 
-  /* PLAY / GAME */
+  /* ══ PLAY / GAME ══════════════════════════════════════════ */
   #play .play-head { text-align: center; max-width: 640px; margin: 0 auto 2.5rem; }
   #play .section-label { justify-content: center; }
   #play .section-label::before { content:''; width: 32px; height: 1px; background: var(--accent); }
+
   .game-wrap {
     max-width: 920px; margin: 0 auto;
-    background: linear-gradient(180deg, rgba(21,21,31,0.9), rgba(13,13,21,0.9));
-    border: 1px solid var(--border); border-radius: 16px; padding: 1rem; position: relative; overflow: hidden;
+    background: linear-gradient(180deg, rgba(21,21,31,0.95), rgba(13,13,21,0.95));
+    border: 1px solid rgba(0,229,160,0.2); border-radius: 16px;
+    padding: 1rem; position: relative;
   }
-  .game-topbar { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem 0.85rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+  .game-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.4rem 0.75rem 0.75rem;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+    position: relative; z-index: 10;
+  }
   .game-topbar .dots { display:flex; gap:6px; }
   .game-topbar .dots i { width:10px; height:10px; border-radius:50%; display:inline-block; }
   .game-topbar .scoreboard { color: var(--muted); display:flex; gap:1.5rem; }
   .game-topbar .scoreboard b { color: var(--accent); }
 
-  /* FIX 1: Game canvas — responsive container */
-  .canvas-shell { position: relative; width: 100%; }
+  /* canvas shell — overflow hidden clips the overlay */
+  .canvas-shell { position: relative; width: 100%; border-radius: 10px; overflow: hidden; }
   #game-canvas {
-    width: 100%;
-    display: block;
-    border-radius: 10px;
+    width: 100%; display: block; border-radius: 10px;
     background: radial-gradient(ellipse 120% 80% at 50% 120%, rgba(0,229,160,0.06), transparent 60%), #0a0a12;
-    touch-action: none; /* prevent scroll-on-swipe while playing */
+    touch-action: none;
   }
 
+  /* overlay floats over canvas only */
   .game-overlay {
     position: absolute; inset: 0; border-radius: 10px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;
-    background: rgba(7,7,12,0.92); backdrop-filter: blur(6px); text-align: center; padding: 1.5rem;
-    /* overlay sits inside canvas-shell only, not over the topbar */
+    background: rgba(7,7,12,0.93); backdrop-filter: blur(6px);
+    text-align: center; padding: 2rem;
   }
   .game-overlay.hidden { display: none; }
   .game-overlay h3 { font-family: 'Syne', sans-serif; font-size: 1.6rem; color: var(--text); letter-spacing: -0.02em; }
   .game-overlay p { color: var(--muted); font-size: 0.9rem; max-width: 420px; }
   .game-overlay .keyhint { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--muted); }
   .game-overlay .kbd { border: 1px solid var(--border); border-radius: 5px; padding: 0.1rem 0.5rem; color: var(--accent); }
+
   .game-btn {
-    margin-top: 0.5rem; padding: 0.7rem 1.8rem; background: var(--accent); color: var(--bg);
-    border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
-    cursor: pointer; transition: transform .15s, box-shadow .15s;
+    margin-top: 0.5rem; padding: 0.75rem 2rem; background: var(--accent); color: var(--bg);
+    border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 0.95rem;
+    cursor: pointer; transition: transform .15s, box-shadow .15s; white-space: nowrap;
   }
   .game-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px -10px rgba(0,229,160,0.6); }
-  .game-legend { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .game-legend {
+    display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 1rem; font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+  }
   .game-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
   .game-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
 
-  /* FIX 2: Touch controls always shown on touch devices, hidden on desktop */
-  .touch-controls {
-    display: none;
-    gap: 0.75rem;
-    margin-top: 0.85rem;
-  }
+  /* touch controls — hidden on desktop */
+  .touch-controls { display: none; gap: 0.75rem; margin-top: 0.85rem; }
   .touch-btn {
     flex: 1; padding: 1rem; border-radius: 10px; border: 1px solid var(--border);
     background: rgba(0,229,160,0.06); color: var(--accent); font-family: 'JetBrains Mono', monospace;
-    font-size: 1rem; font-weight: 700;
-    -webkit-user-select: none; user-select: none;
-    touch-action: manipulation;
-    cursor: pointer;
-    /* larger tap targets on mobile */
-    min-height: 56px;
+    font-size: 1rem; font-weight: 700; -webkit-user-select: none; user-select: none;
+    touch-action: manipulation; cursor: pointer; min-height: 56px;
   }
   .touch-btn:active { background: rgba(0,229,160,0.18); transform: scale(0.97); }
 
@@ -378,7 +381,7 @@
     a, button, .btn-primary, .btn-outline, .link-pill, .gh-link,
     .project-title a, .exp-company a, .contact-email, .game-btn { cursor: pointer; }
 
-    /* FIX 4: Nav — proper height & alignment */
+    /* ── NAV ── */
     nav {
       padding: 0 1.25rem;
       height: 54px;
@@ -389,118 +392,145 @@
     .nav-logo { font-size: 1rem; }
     .nav-toggle { display: flex; flex-direction: column; justify-content: center; }
 
-    /* FIX 5: Sidebar drawer — correct positioning */
+    /* ── SIDEBAR DRAWER ── */
     .nav-links {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: auto;
-      width: min(82vw, 290px);
+      width: 75vw;
+      max-width: 280px;
       flex-direction: column;
       align-items: flex-start;
       justify-content: flex-start;
       gap: 0;
-      /* fully solid — no bleed-through */
-      background: #0c0c14;
-      border-left: 1px solid rgba(255,255,255,0.14);
-      padding: 5.5rem 2rem 2.5rem;
-      transform: translateX(100%);
-      transition: transform .32s cubic-bezier(.2,.7,.2,1);
+      /* Fully solid — no bleed-through on iOS Safari */
+      background: #111118;
+      border-left: 1px solid rgba(0,229,160,0.2);
+      padding: 70px 1.5rem 2rem;
+      transform: translateX(110%);
+      transition: transform .3s ease;
       z-index: 110;
       list-style: none;
       overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
     }
     .nav-links.open { transform: translateX(0); }
     .nav-links li { width: 100%; }
     .nav-links a {
       display: block;
       width: 100%;
-      padding: 1.1rem 0;
-      font-size: 1.05rem;
-      /* bright white so it's readable */
-      color: #e8e8e0;
-      border-bottom: 1px solid rgba(255,255,255,0.09);
-      letter-spacing: 0.02em;
+      padding: 1rem 0;
+      font-size: 1rem;
+      font-weight: 500;
+      /* Full brightness — was nearly invisible before */
+      color: #f0efe8 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-decoration: none;
     }
-    .nav-links a:active { color: var(--accent); }
     .nav-links a.nav-cta {
-      margin-top: 1.75rem;
+      margin-top: 1.5rem;
       text-align: center;
       border: 1px solid var(--accent) !important;
       border-radius: 6px;
-      padding: 0.9rem 1rem;
+      padding: 0.85rem 1rem;
       color: var(--accent) !important;
-      font-weight: 500;
     }
     /* Backdrop */
     .nav-backdrop {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.8);
       opacity: 0; pointer-events: none;
       transition: opacity .3s;
       z-index: 105;
     }
     .nav-backdrop.open { opacity: 1; pointer-events: auto; }
 
-    .ticker-bar { top: 54px; height: 30px; }
-    .ticker-item { font-size: 0.65rem; padding: 0 1rem; }
+    /* ── TICKER ── */
+    .ticker-bar { top: 54px; height: 28px; }
+    .ticker-item { font-size: 0.62rem; padding: 0 0.75rem; }
 
+    /* ── SECTIONS ── */
     section { padding: 3.5rem 1.25rem; }
-    #hero { padding: 7rem 1.25rem 3.5rem; min-height: auto; }
-    .hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.1em; }
-    .hero-desc { font-size: 1rem; margin-bottom: 2rem; }
+    #hero { padding: 6.5rem 1.25rem 3rem; min-height: auto; }
+    .hero-eyebrow { font-size: 0.68rem; letter-spacing: 0.08em; }
+    .hero-desc { font-size: 0.95rem; margin-bottom: 2rem; }
     .hero-actions { gap: 0.75rem; }
     .btn-primary, .btn-outline { flex: 1; text-align: center; padding: 0.85rem 1rem; min-width: 0; }
     .hero-stats { gap: 1.25rem 2rem; margin-top: 2.5rem; padding-top: 2rem; }
     .stat-num { font-size: 1.6rem; }
 
+    /* ── ABOUT ── */
     .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
     .skills-grid { grid-template-columns: 1fr 1fr; }
     .about-links { gap: 0.6rem; }
 
+    /* ── PROJECTS ── */
     .projects-grid { grid-template-columns: 1fr; gap: 1rem; }
     .project-card { padding: 1.5rem; }
 
-    /* FIX 6: Experience items — proper single-column layout */
-    .exp-item {
-      grid-template-columns: 1fr;
-      gap: 0.5rem;
-      padding: 1.75rem 0;
-    }
-    .exp-left {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
+    /* ── EXPERIENCE ── */
+    .exp-item { grid-template-columns: 1fr; gap: 0.4rem; padding: 1.75rem 0; }
+    .exp-left { display: flex; flex-direction: row; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
     .exp-period { margin-bottom: 0; font-size: 0.78rem; }
     .exp-location { margin-bottom: 0; font-size: 0.72rem; }
-    .exp-location::before { content: '·'; margin-right: 0.35rem; }
     .exp-mode { margin-top: 0; }
 
+    /* ── EDUCATION ── */
     .edu-grid { grid-template-columns: 1fr; }
 
-    /* FIX 7: Game wrapper — tighter on mobile */
-    .game-wrap { padding: 0.5rem; border-radius: 12px; }
-    /* reduce canvas render height on mobile for better fit */
-    #game-canvas { max-height: 160px; object-fit: fill; }
-    .game-topbar { font-size: 0.62rem; padding: 0.35rem 0.4rem 0.5rem; }
-    .game-topbar .scoreboard { gap: 0.75rem; }
-    /* hide keyboard hint on mobile */
+    /* ── GAME — mobile ── */
+    .game-wrap {
+      padding: 0.75rem;
+      border-radius: 14px;
+      border: 1px solid rgba(0,229,160,0.25);
+      background: #0d0d16;
+      /* CRITICAL: position relative so overlay covers the whole card */
+      position: relative;
+    }
+    .game-topbar {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.4rem 0.5rem;
+      position: relative;
+      z-index: 5;
+    }
+    .game-topbar .scoreboard { gap: 0.6rem; }
+    /* Canvas — fixed height so it's always visible */
+    #game-canvas {
+      width: 100% !important;
+      height: 150px !important;
+      border-radius: 8px;
+      display: block;
+      background: #09090f !important;
+    }
+    /* Touch buttons */
+    .touch-controls { display: flex; gap: 0.6rem; margin-top: 0.65rem; }
+    .touch-btn { min-height: 58px; font-size: 0.95rem; border-radius: 10px; }
+    /* Overlay: covers ENTIRE .game-wrap (topbar + canvas + buttons area) */
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      background: rgba(8,8,16,0.97);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 1.5rem 1.25rem;
+      gap: 0.65rem;
+      z-index: 30;
+    }
+    .game-overlay h3 { font-size: 1.1rem; line-height: 1.3; }
+    .game-overlay p { font-size: 0.78rem; line-height: 1.5; max-width: 100%; }
+    .game-overlay .game-btn {
+      padding: 0.75rem 2rem;
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
     .game-overlay .keyhint { display: none; }
-    .game-overlay h3 { font-size: 1.1rem; margin-bottom: 0.2rem; }
-    .game-overlay p { font-size: 0.78rem; margin-bottom: 0.25rem; }
-    .game-overlay .game-btn { padding: 0.6rem 1.4rem; font-size: 0.85rem; margin-top: 0.25rem; }
-    .game-legend { gap: 0.6rem 1rem; font-size: 0.65rem; }
+    .game-legend { gap: 0.4rem 0.9rem; font-size: 0.62rem; margin-top: 0.65rem; }
 
-    /* FIX 8: Show touch controls on mobile */
-    .touch-controls { display: flex; }
-
+    /* ── CONTACT ── */
     footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 2rem 1.25rem; }
     .cert-count-card { flex-direction: column; gap: 0.75rem; text-align: center; }
     .cert-big-num { font-size: 2.8rem; }
     .contact-inner { padding: 1.75rem; }
-    .contact-email { font-size: 1.15rem; word-break: break-all; }
+    .contact-email { font-size: 1.1rem; word-break: break-all; }
     .contact-row { flex-direction: column; }
     .contact-row .btn-primary, .contact-row .btn-outline { text-align: center; }
   }
@@ -807,12 +837,12 @@
     </div>
     <div class="canvas-shell">
       <canvas id="game-canvas"></canvas>
-      <div class="game-overlay" id="overlay">
-        <h3>Ready to clean some data?</h3>
-        <p>You're a data point streaming through a messy pipeline. Dodge the errors, collect clean rows.</p>
-        <button class="game-btn" id="start-btn">▶ Start Run</button>
-        <p class="keyhint"><span class="kbd">Space</span> / <span class="kbd">↑</span> / tap to jump · <span class="kbd">↓</span> to duck</p>
-      </div>
+    </div>
+    <div class="game-overlay" id="overlay">
+      <h3>Ready to clean some data?</h3>
+      <p>You're a data point streaming through a messy pipeline. Dodge the errors, collect clean rows.</p>
+      <button class="game-btn" id="start-btn">▶ Start Run</button>
+      <p class="keyhint"><span class="kbd">Space</span> / <span class="kbd">↑</span> / tap to jump · <span class="kbd">↓</span> to duck</p>
     </div>
     <div class="touch-controls">
       <button class="touch-btn" id="touchJump">▲ JUMP</button>
@@ -1030,16 +1060,9 @@
   try { best = parseInt(localStorage.getItem('dataRunnerBest') || '0') || 0; } catch (e) {}
   bestEl.textContent = best;
 
-  // Responsive canvas: shrink internal height on mobile for better fit
-  function setCanvasSize() {
-    const isMobile = window.innerWidth < 768;
-    canvasEl.width = VW;
-    canvasEl.height = isMobile ? 180 : VH;
-    // Update GROUND-equivalent via CSS aspect ratio
-    canvasEl.style.aspectRatio = VW + '/' + (isMobile ? 180 : VH);
-  }
-  setCanvasSize();
-  window.addEventListener('resize', setCanvasSize);
+  // Fixed virtual canvas — CSS scales it, game logic stays in VW/VH space
+  canvasEl.width = VW;
+  canvasEl.height = VH;
 
   const player = { x: 90, y: GROUND, w: 26, h: 26, vy: 0, ducking: false, onGround: true };
   let obstacles = [], bonuses = [], speed = 5, score = 0, frame = 0, running = false, gameOver = false;
@@ -1168,7 +1191,7 @@
   function loop(ts = 0) {
     if (!running) return;
     // throttle to ~60fps equivalent on high-refresh screens
-    if (ts - lastTime < 14) { requestAnimationFrame(loop); return; }
+    if (ts - lastTime < 16) { requestAnimationFrame(loop); return; }
     lastTime = ts;
     update();
     if (gameOver) { draw(); return; }
