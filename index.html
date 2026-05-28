@@ -34,20 +34,15 @@
   }
   @media (hover: none) { body { cursor: auto; } #cursor, #cursor-dot { display: none !important; } }
 
-  /* FLOW FIELD CANVAS (fixed bg) */
-  #flow-canvas {
-    position: fixed; inset: 0; z-index: 0;
-    pointer-events: none;
-  }
+  #flow-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
   .page-veil {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background: radial-gradient(ellipse 70% 60% at 80% 0%, rgba(123,97,255,0.10), transparent 60%),
                 radial-gradient(ellipse 60% 50% at 0% 100%, rgba(0,229,160,0.07), transparent 60%);
   }
-  /* every layer above the canvas */
   nav, section, footer, .ticker-bar { position: relative; z-index: 2; }
 
-  /* CUSTOM CURSOR */
+  /* CURSOR */
   #cursor {
     position: fixed; top: 0; left: 0; width: 34px; height: 34px;
     border: 1px solid rgba(0,229,160,0.5); border-radius: 50%;
@@ -216,7 +211,6 @@
     opacity: 0; transition: opacity .25s;
     pointer-events: none; z-index: 0;
   }
-  /* keep all interactive card content above the gradient overlay */
   .project-card > * { position: relative; z-index: 1; }
   .project-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -22px rgba(0,229,160,0.4); }
   .project-card:hover::before { opacity: 1; }
@@ -278,11 +272,19 @@
   .game-topbar .dots i { width:10px; height:10px; border-radius:50%; display:inline-block; }
   .game-topbar .scoreboard { color: var(--muted); display:flex; gap:1.5rem; }
   .game-topbar .scoreboard b { color: var(--accent); }
-  #game-canvas { width: 100%; display: block; border-radius: 10px; background:
-      radial-gradient(ellipse 120% 80% at 50% 120%, rgba(0,229,160,0.06), transparent 60%), #0a0a12;
-    touch-action: manipulation; }
+
+  /* FIX 1: Game canvas — responsive container */
+  .canvas-shell { position: relative; width: 100%; }
+  #game-canvas {
+    width: 100%;
+    display: block;
+    border-radius: 10px;
+    background: radial-gradient(ellipse 120% 80% at 50% 120%, rgba(0,229,160,0.06), transparent 60%), #0a0a12;
+    touch-action: none; /* prevent scroll-on-swipe while playing */
+  }
+
   .game-overlay {
-    position: absolute; inset: 1rem; top: 3.2rem; border-radius: 10px;
+    position: absolute; inset: 0; border-radius: 10px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;
     background: rgba(7,7,12,0.78); backdrop-filter: blur(4px); text-align: center; padding: 1rem;
   }
@@ -294,12 +296,30 @@
   .game-btn {
     margin-top: 0.5rem; padding: 0.7rem 1.8rem; background: var(--accent); color: var(--bg);
     border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.9rem;
-    cursor: none; transition: transform .15s, box-shadow .15s;
+    cursor: pointer; transition: transform .15s, box-shadow .15s;
   }
   .game-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px -10px rgba(0,229,160,0.6); }
   .game-legend { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
   .game-legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
   .game-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  /* FIX 2: Touch controls always shown on touch devices, hidden on desktop */
+  .touch-controls {
+    display: none;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+  }
+  .touch-btn {
+    flex: 1; padding: 1rem; border-radius: 10px; border: 1px solid var(--border);
+    background: rgba(0,229,160,0.06); color: var(--accent); font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem; font-weight: 700;
+    -webkit-user-select: none; user-select: none;
+    touch-action: manipulation;
+    cursor: pointer;
+    /* larger tap targets on mobile */
+    min-height: 56px;
+  }
+  .touch-btn:active { background: rgba(0,229,160,0.18); transform: scale(0.97); }
 
   /* CONTACT */
   .contact-inner { max-width: 600px; background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 3.5rem; }
@@ -320,30 +340,26 @@
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: linear-gradient(var(--accent), var(--accent2)); border-radius: 2px; }
 
-  /* MOBILE MENU (hamburger) */
+  /* ===================== MOBILE MENU ===================== */
   .nav-toggle {
-    display: none; background: none; border: none; cursor: pointer;
-    width: 34px; height: 34px; padding: 6px; position: relative; z-index: 120;
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 40px; height: 40px;
+    padding: 6px;
+    position: relative;
+    z-index: 120;
+    /* FIX 3: ensure it's always on top and tappable */
+    flex-shrink: 0;
   }
   .nav-toggle span {
     display: block; width: 100%; height: 2px; background: var(--text);
-    border-radius: 2px; transition: transform .3s, opacity .3s; margin: 4px 0;
+    border-radius: 2px; transition: transform .3s, opacity .3s; margin: 5px 0;
   }
-  .nav-toggle.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .nav-toggle.open span:nth-child(2) { opacity: 0; }
-  .nav-toggle.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
-
-  /* GAME canvas responsive wrapper */
-  .canvas-shell { position: relative; width: 100%; }
-  /* on-screen touch controls (mobile only) */
-  .touch-controls { display: none; gap: 0.75rem; margin-top: 0.85rem; }
-  .touch-btn {
-    flex: 1; padding: 0.9rem; border-radius: 10px; border: 1px solid var(--border);
-    background: rgba(0,229,160,0.06); color: var(--accent); font-family: 'JetBrains Mono', monospace;
-    font-size: 0.95rem; font-weight: 700; -webkit-user-select: none; user-select: none;
-    touch-action: manipulation;
-  }
-  .touch-btn:active { background: rgba(0,229,160,0.18); transform: scale(0.97); }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
   /* TABLET */
   @media (max-width: 1024px) {
@@ -353,7 +369,7 @@
     .about-grid { gap: 3rem; }
   }
 
-  /* MOBILE */
+  /* ===================== MOBILE ===================== */
   @media (max-width: 768px) {
     html { font-size: 15px; }
     body { cursor: auto; }
@@ -361,23 +377,68 @@
     a, button, .btn-primary, .btn-outline, .link-pill, .gh-link,
     .project-title a, .exp-company a, .contact-email, .game-btn { cursor: pointer; }
 
-    nav { padding: 0.9rem 1.25rem; }
-    .nav-toggle { display: block; }
+    /* FIX 4: Nav — proper height & alignment */
+    nav {
+      padding: 0 1.25rem;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo { font-size: 1rem; }
+    .nav-toggle { display: flex; flex-direction: column; justify-content: center; }
+
+    /* FIX 5: Sidebar drawer — correct positioning */
     .nav-links {
-      position: fixed; inset: 0 0 0 auto; width: min(78vw, 320px);
-      flex-direction: column; align-items: flex-start; gap: 0;
-      background: rgba(10,10,16,0.97); backdrop-filter: blur(20px);
-      padding: 6rem 2rem 2rem; transform: translateX(100%);
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: auto;
+      width: min(80vw, 300px);
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 0;
+      background: rgba(10,10,16,0.98);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      padding: 5rem 1.75rem 2rem;
+      transform: translateX(100%);
       transition: transform .35s cubic-bezier(.2,.7,.2,1);
-      border-left: 1px solid var(--border); z-index: 110;
+      border-left: 1px solid var(--border);
+      z-index: 110;
+      list-style: none;
+      /* FIX: ensure full height and no overflow issues */
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .nav-links.open { transform: translateX(0); }
     .nav-links li { width: 100%; }
-    .nav-links a { display: block; width: 100%; padding: 1rem 0; font-size: 1.05rem; border-bottom: 1px solid var(--border); }
-    .nav-links a.nav-cta { margin-top: 1rem; text-align: center; border-bottom: none; padding: 0.85rem; }
+    .nav-links a {
+      display: block;
+      width: 100%;
+      padding: 1rem 0;
+      font-size: 1.1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.nav-cta {
+      margin-top: 1.5rem;
+      text-align: center;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      color: var(--accent) !important;
+    }
+    /* Backdrop */
     .nav-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: 0; pointer-events: none;
-      transition: opacity .35s; z-index: 105;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      opacity: 0; pointer-events: none;
+      transition: opacity .35s;
+      z-index: 105;
     }
     .nav-backdrop.open { opacity: 1; pointer-events: auto; }
 
@@ -400,28 +461,44 @@
     .projects-grid { grid-template-columns: 1fr; gap: 1rem; }
     .project-card { padding: 1.5rem; }
 
-    .exp-item { grid-template-columns: 1fr; gap: 0.6rem; padding: 2rem 0; }
-    .exp-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    .exp-period, .exp-location { margin-bottom: 0; }
+    /* FIX 6: Experience items — proper single-column layout */
+    .exp-item {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      padding: 1.75rem 0;
+    }
+    .exp-left {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .exp-period { margin-bottom: 0; font-size: 0.78rem; }
+    .exp-location { margin-bottom: 0; font-size: 0.72rem; }
+    .exp-location::before { content: '·'; margin-right: 0.35rem; }
     .exp-mode { margin-top: 0; }
 
     .edu-grid { grid-template-columns: 1fr; }
 
-    .game-wrap { padding: 0.6rem; border-radius: 12px; }
-    .game-topbar { font-size: 0.62rem; padding: 0.4rem 0.4rem 0.6rem; }
-    .game-topbar .scoreboard { gap: 0.9rem; }
-    .game-overlay { inset: 0.6rem; top: 2.6rem; }
-    .game-overlay h3 { font-size: 1.25rem; }
-    .game-overlay p { font-size: 0.82rem; }
+    /* FIX 7: Game wrapper — tighter on mobile */
+    .game-wrap { padding: 0.5rem; border-radius: 12px; }
+    .game-topbar { font-size: 0.62rem; padding: 0.35rem 0.4rem 0.5rem; }
+    .game-topbar .scoreboard { gap: 0.75rem; }
+    /* hide keyboard hint on mobile */
     .game-overlay .keyhint { display: none; }
+    .game-overlay h3 { font-size: 1.2rem; }
+    .game-overlay p { font-size: 0.82rem; }
+    .game-legend { gap: 0.6rem 1rem; font-size: 0.65rem; }
+
+    /* FIX 8: Show touch controls on mobile */
     .touch-controls { display: flex; }
-    .game-legend { gap: 0.75rem 1.25rem; font-size: 0.65rem; }
 
     footer { flex-direction: column; gap: 0.5rem; text-align: center; padding: 2rem 1.25rem; }
     .cert-count-card { flex-direction: column; gap: 0.75rem; text-align: center; }
     .cert-big-num { font-size: 2.8rem; }
     .contact-inner { padding: 1.75rem; }
-    .contact-email { font-size: 1.2rem; word-break: break-all; }
+    .contact-email { font-size: 1.15rem; word-break: break-all; }
     .contact-row { flex-direction: column; }
     .contact-row .btn-primary, .contact-row .btn-outline { text-align: center; }
   }
@@ -432,6 +509,7 @@
     .hero-stats { gap: 1rem 1.5rem; }
     .hero-actions { flex-direction: column; }
     .btn-primary, .btn-outline { width: 100%; }
+    .exp-left { flex-direction: column; align-items: flex-start; gap: 0.2rem; }
   }
 </style>
 </head>
@@ -458,7 +536,6 @@
 </nav>
 <div class="nav-backdrop" id="navBackdrop"></div>
 
-<!-- TICKER -->
 <div class="ticker-bar" aria-hidden="true">
   <div class="ticker-track" id="ticker"></div>
 </div>
@@ -473,8 +550,8 @@
       M.Sc. Data Analytics (1:1) at Dublin Business School, graduating August 2026. I build end-to-end data solutions — ETL pipelines, clinical data warehouses, financial dashboards, and predictive models — and I go beyond the <em>what</em> to find the <em>why</em>. Based in Dublin, Ireland.
     </p>
     <div class="hero-actions">
-      <a href="#projects" class="btn-primary" data-cursor>View My Work</a>
-      <a href="#contact" class="btn-outline" data-cursor>Get In Touch</a>
+      <a href="#projects" class="btn-primary">View My Work</a>
+      <a href="#contact" class="btn-outline">Get In Touch</a>
     </div>
     <div class="hero-stats">
       <div><span class="stat-num" data-count="1:1">1:1</span><span class="stat-label">MSc Grade</span></div>
@@ -497,9 +574,9 @@
       <p>Skilled in <strong>SQL, Python, Power BI, Tableau, and statistical modelling</strong>, I've built clinical data warehouses, financial market pipelines, and machine learning models deployed via Flask. I bridge the gap between technical teams and business stakeholders.</p>
       <p>Currently based in <strong>Dublin, Ireland</strong> on a Stamp 2 visa, with eligibility for a <strong>Stamp 1G Graduate Permission</strong> (24 months, full-time work rights) from August 2026. Actively open to <strong>data analyst and financial analytics roles across the EU</strong>.</p>
       <div class="about-links">
-        <a href="https://linkedin.com/in/abinraju2308" target="_blank" class="link-pill" data-cursor>↗ LinkedIn</a>
-        <a href="https://github.com/abinraju23" target="_blank" class="link-pill" data-cursor>↗ GitHub</a>
-        <a href="mailto:abinraju63@gmail.com" class="link-pill" data-cursor>✉ Email</a>
+        <a href="https://linkedin.com/in/abinraju2308" target="_blank" class="link-pill">↗ LinkedIn</a>
+        <a href="https://github.com/abinraju23" target="_blank" class="link-pill">↗ GitHub</a>
+        <a href="mailto:abinraju63@gmail.com" class="link-pill">✉ Email</a>
       </div>
     </div>
     <div>
@@ -523,95 +600,83 @@
     <p class="section-subtitle">End-to-end data solutions, ML apps, and dashboards — all publicly available on GitHub.</p>
   </div>
   <div class="projects-grid stagger">
-
     <div class="project-card featured">
       <div class="project-num">01 <span class="proj-badge">MSc · Featured</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/pharmacy-analytics-dw" target="_blank" data-cursor>Clinical Pharmacy Data Warehouse</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/pharmacy-analytics-dw" target="_blank">Clinical Pharmacy Data Warehouse</a></h3>
       <p class="project-desc">End-to-end clinical pharmacy data warehouse on MIMIC-III real hospital data. SQL Server Kimball star schema with SCD Type 2, 4 SSIS ETL packages, 4 SSRS/Tableau dashboards for CEO, Clinical, Medical, and Operational audiences. Also modelled Neo4j graph DB with comparative SQL vs CQL queries.</p>
       <div class="project-tags"><span class="tag">SQL Server</span><span class="tag">SSIS</span><span class="tag">SSRS</span><span class="tag">Tableau</span><span class="tag">Neo4j</span><span class="tag">MIMIC-III</span></div>
-      <a href="https://github.com/abinraju23/pharmacy-analytics-dw" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/pharmacy-analytics-dw" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card featured">
       <div class="project-num">02 <span class="proj-badge">MSc · Featured</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/Stock_Market_Indicators_Pipeline" target="_blank" data-cursor>Stock Market Indicators Pipeline</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/Stock_Market_Indicators_Pipeline" target="_blank">Stock Market Indicators Pipeline</a></h3>
       <p class="project-desc">End-to-end pipeline: scrapes most active stocks, enriches via yfinance API (OHLCV + RSI, MACD, Bollinger Bands, Momentum Score), cleans with Pandas/NumPy/regex, and stores in SQLite with full unit testing. Built for real-time swing trading screening and analysis.</p>
       <div class="project-tags"><span class="tag">Python</span><span class="tag">yfinance</span><span class="tag">Pandas</span><span class="tag">SQLite</span><span class="tag">NumPy</span></div>
-      <a href="https://github.com/abinraju23/Stock_Market_Indicators_Pipeline" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/Stock_Market_Indicators_Pipeline" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">03 <span class="proj-badge">MSc · Tableau</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/HSE_Children_Referred_Data_Visualisation" target="_blank" data-cursor>HSE Family Support Referrals Dashboard</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/HSE_Children_Referred_Data_Visualisation" target="_blank">HSE Family Support Referrals Dashboard</a></h3>
       <p class="project-desc">Two interactive Tableau dashboards (regional trend overview + heatmap/leaderboard) analysing HSE child referral data across Ireland from 2019–2024 using Irish Government open data from data.gov.ie.</p>
       <div class="project-tags"><span class="tag">Tableau</span><span class="tag">Open Data</span><span class="tag">Irish Gov</span></div>
-      <a href="https://github.com/abinraju23/HSE_Children_Referred_Data_Visualisation" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/HSE_Children_Referred_Data_Visualisation" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">04 <span class="proj-badge">ML · Internship</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/InternAttritionPrediction" target="_blank" data-cursor>Intern Attrition Predictor (KNN)</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/InternAttritionPrediction" target="_blank">Intern Attrition Predictor (KNN)</a></h3>
       <p class="project-desc">End-to-end intern attrition prediction system using KNN to identify at-risk interns. Deployed via Flask with a web interface, built on real company HR data. Improved retention forecasting accuracy by 15%.</p>
       <div class="project-tags"><span class="tag">KNN</span><span class="tag">Scikit-learn</span><span class="tag">Flask</span><span class="tag">Pandas</span></div>
-      <a href="https://github.com/abinraju23/InternAttritionPrediction" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/InternAttritionPrediction" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">05 <span class="proj-badge">ML · Time Series</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/AQI_Prediction" target="_blank" data-cursor>AQI Prediction (Time Series / ML)</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/AQI_Prediction" target="_blank">AQI Prediction (Time Series / ML)</a></h3>
       <p class="project-desc">Time series and machine learning project on air quality index prediction. Covers data preprocessing, feature engineering, model training, and forecasting.</p>
       <div class="project-tags"><span class="tag">Python</span><span class="tag">Time Series</span><span class="tag">ML</span><span class="tag">Jupyter</span></div>
-      <a href="https://github.com/abinraju23/AQI_Prediction" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/AQI_Prediction" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">06 <span class="proj-badge">B.Tech Final Year</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/StockMarketPrediction" target="_blank" data-cursor>Stock Market Prediction (LSTM)</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/StockMarketPrediction" target="_blank">Stock Market Prediction (LSTM)</a></h3>
       <p class="project-desc">LSTM neural network forecasting app for 8 stocks (AAPL, AMZN, TSLA, RELIANCE, and more). Deployed via Flask for real-time predictions, covering data preprocessing, feature engineering, and evaluation.</p>
       <div class="project-tags"><span class="tag">LSTM</span><span class="tag">Flask</span><span class="tag">Pandas</span><span class="tag">Scikit-learn</span></div>
-      <a href="https://github.com/abinraju23/StockMarketPrediction" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/StockMarketPrediction" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">07 <span class="proj-badge">Security · Python</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/Vulnerability_Scanner" target="_blank" data-cursor>Web Vulnerability Scanner</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/Vulnerability_Scanner" target="_blank">Web Vulnerability Scanner</a></h3>
       <p class="project-desc">Lightweight web vulnerability scanner built with Python and Django. Identifies common security issues in web applications — point it at a target URL and review a full findings report.</p>
       <div class="project-tags"><span class="tag">Python</span><span class="tag">Django</span><span class="tag">Security</span></div>
-      <a href="https://github.com/abinraju23/Vulnerability_Scanner" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/Vulnerability_Scanner" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">08 <span class="proj-badge">Full Stack · JS</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/JobSpherefinal" target="_blank" data-cursor>JobSphere — Job Matching Platform</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/JobSpherefinal" target="_blank">JobSphere — Job Matching Platform</a></h3>
       <p class="project-desc">Full-stack job matching platform bridging talented professionals and employers. Focuses on values-based matching beyond skills alone. Built with JavaScript.</p>
       <div class="project-tags"><span class="tag">JavaScript</span><span class="tag">Full Stack</span></div>
-      <a href="https://github.com/abinraju23/JobSpherefinal" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/JobSpherefinal" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">09 <span class="proj-badge">IIT Madras Diploma</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/MAD1" target="_blank" data-cursor>Vehicle Parking Management System</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/MAD1" target="_blank">Vehicle Parking Management System</a></h3>
       <p class="project-desc">Multi-user Flask web app for managing car parks with admin and user roles. Secure authentication via Flask-Login, SQLAlchemy database management, and a responsive interface.</p>
       <div class="project-tags"><span class="tag">Flask</span><span class="tag">SQLAlchemy</span><span class="tag">Python</span></div>
-      <a href="https://github.com/abinraju23/MAD1" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/MAD1" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">10 <span class="proj-badge">Python</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/Ecommerce" target="_blank" data-cursor>E-Commerce Application</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/Ecommerce" target="_blank">E-Commerce Application</a></h3>
       <p class="project-desc">Python-based e-commerce application with product management, cart, and order handling functionality.</p>
       <div class="project-tags"><span class="tag">Python</span></div>
-      <a href="https://github.com/abinraju23/Ecommerce" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/Ecommerce" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
     <div class="project-card">
       <div class="project-num">11 <span class="proj-badge">Fun · Web</span></div>
-      <h3 class="project-title"><a href="https://github.com/abinraju23/valentine" target="_blank" data-cursor>Interactive Valentine Page</a></h3>
+      <h3 class="project-title"><a href="https://github.com/abinraju23/valentine" target="_blank">Interactive Valentine Page</a></h3>
       <p class="project-desc">A fun, interactive Valentine-themed web page with playful "Yes" and "No" buttons. The "No" button keeps changing its response every click. Built with HTML, CSS, and JavaScript.</p>
       <div class="project-tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div>
-      <a href="https://github.com/abinraju23/valentine" target="_blank" class="gh-link" data-cursor>↗ View on GitHub</a>
+      <a href="https://github.com/abinraju23/valentine" target="_blank" class="gh-link">↗ View on GitHub</a>
     </div>
-
   </div>
 </section>
 
@@ -630,7 +695,7 @@
       </div>
       <div>
         <div class="exp-role">Customer Sales Assistant</div>
-        <div class="exp-company"><a href="https://www.tesco.ie" target="_blank" data-cursor>Tesco Ireland</a></div>
+        <div class="exp-company"><a href="https://www.tesco.ie" target="_blank">Tesco Ireland</a></div>
         <ul class="exp-bullets">
           <li>Deliver excellent customer service in a high-volume, fast-paced retail environment, handling queries, transactions, and complaints professionally.</li>
           <li>Operate POS systems accurately, handling cash and card payments and maintaining till accuracy.</li>
@@ -646,7 +711,7 @@
       </div>
       <div>
         <div class="exp-role">Data Science Intern</div>
-        <div class="exp-company"><a href="https://cognifyz.com" target="_blank" data-cursor>Cognifyz Technologies</a></div>
+        <div class="exp-company"><a href="https://cognifyz.com" target="_blank">Cognifyz Technologies</a></div>
         <div class="exp-company-desc">AI, ML, data analytics, and web development company based in Nagpur, Maharashtra.</div>
         <ul class="exp-bullets">
           <li>Cleaned and standardised large datasets using Python and Pandas to enhance data quality.</li>
@@ -662,7 +727,7 @@
       </div>
       <div>
         <div class="exp-role">Data Science Intern</div>
-        <div class="exp-company"><a href="https://www.idatalytics.com" target="_blank" data-cursor>iDatalytics</a></div>
+        <div class="exp-company"><a href="https://www.idatalytics.com" target="_blank">iDatalytics</a></div>
         <div class="exp-company-desc">Data analytics firm specialising in data engineering, AI, business intelligence, Power BI, and automation solutions.</div>
         <ul class="exp-bullets">
           <li>Built Tableau KPI dashboards for stakeholder reporting; translated operational needs into analytical models and data workflows.</li>
@@ -700,7 +765,6 @@
       <div class="edu-grade">First Class Hons — 7.5/10</div>
     </div>
   </div>
-
   <div style="margin-top:4rem;" class="fade-in">
     <p class="section-label">Certifications</p>
     <div class="cert-count-card">
@@ -728,7 +792,7 @@
   <div class="play-head fade-in">
     <p class="section-label">Take a break</p>
     <h2 class="section-title">Data Runner 🏃‍♂️</h2>
-    <p class="section-subtitle" style="margin:0 auto;">A data analyst's worst nightmares in one endless runner. Jump over <strong style="color:var(--accent3)">NULLs, NaNs &amp; outliers</strong>, grab the <strong style="color:var(--accent)">clean rows</strong>, and see how many records you can process. Press space to play.</p>
+    <p class="section-subtitle" style="margin:0 auto;">A data analyst's worst nightmares in one endless runner. Jump over <strong style="color:var(--accent3)">NULLs, NaNs &amp; outliers</strong>, grab the <strong style="color:var(--accent)">clean rows</strong>, and see how many records you can process.</p>
   </div>
 
   <div class="game-wrap fade-in">
@@ -740,11 +804,11 @@
       </div>
     </div>
     <div class="canvas-shell">
-      <canvas id="game-canvas" width="880" height="240"></canvas>
+      <canvas id="game-canvas"></canvas>
       <div class="game-overlay" id="overlay">
         <h3>Ready to clean some data?</h3>
         <p>You're a data point streaming through a messy pipeline. Dodge the errors, collect clean rows.</p>
-        <button class="game-btn" id="start-btn" data-cursor>▶ Start Run</button>
+        <button class="game-btn" id="start-btn">▶ Start Run</button>
         <p class="keyhint"><span class="kbd">Space</span> / <span class="kbd">↑</span> / tap to jump · <span class="kbd">↓</span> to duck</p>
       </div>
     </div>
@@ -768,14 +832,14 @@
   </div>
   <div class="contact-inner fade-in">
     <p style="color:var(--muted);font-weight:300;font-size:0.95rem;line-height:1.8;">Currently open to <strong style="color:var(--text);">Data Analyst, Business Intelligence, and Financial Analytics roles</strong> across the EU or remote. Whether you have an opportunity or just want to connect — reach out.</p>
-    <a href="mailto:abinraju63@gmail.com" class="contact-email" data-cursor>abinraju63@gmail.com</a>
-    <p style="color:var(--muted);font-size:0.82rem;">+353 (087) 492 4093 · Dublin, Ireland</p>
+    <a href="mailto:abinraju63@gmail.com" class="contact-email">abinraju63@gmail.com</a>
+    <p style="color:var(--muted);font-size:0.82rem;">+353 (87) 492 4093 · Dublin, Ireland</p>
     <div class="visa-note">
       <strong>Right to work:</strong> Currently on Stamp 2 visa. Eligible for <strong>Stamp 1G Graduate Permission</strong> (24 months, full-time work rights) upon graduation in August 2026.
     </div>
     <div class="contact-row">
-      <a href="https://linkedin.com/in/abinraju2308" target="_blank" class="btn-primary" data-cursor>LinkedIn →</a>
-      <a href="https://github.com/abinraju23" target="_blank" class="btn-outline" data-cursor>GitHub →</a>
+      <a href="https://linkedin.com/in/abinraju2308" target="_blank" class="btn-primary">LinkedIn →</a>
+      <a href="https://github.com/abinraju23" target="_blank" class="btn-outline">GitHub →</a>
     </div>
   </div>
 </section>
@@ -793,7 +857,6 @@
   let w, h, particles = [], t = 0;
   const COLORS = ['rgba(0,229,160,', 'rgba(123,97,255,', 'rgba(255,93,143,'];
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   function resize() {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
@@ -810,7 +873,6 @@
       });
     }
   }
-  // lightweight pseudo flow field using layered trig
   function field(x, y) {
     const sc = 0.0016;
     return (Math.sin(x * sc + t) + Math.cos(y * sc - t * 0.7) + Math.sin((x + y) * sc * 0.5 + t * 0.3)) * 1.1;
@@ -836,7 +898,7 @@
   resize();
   window.addEventListener('resize', resize);
   if (!reduce) draw();
-  else { ctx.fillStyle = '#07070c'; ctx.fillRect(0,0,w,h); }
+  else { ctx.fillStyle = '#07070c'; ctx.fillRect(0, 0, w, h); }
 })();
 
 /* ============ TICKER ============ */
@@ -847,12 +909,10 @@
     ['IIT MADRAS','Programming'],['MASTERCARD','Cybersecurity'],['HP','Software Eng'],
     ['UPENN','Spreadsheets & Models'],['ILLINOIS TECH','Python Certified']
   ];
-  let html = '';
   const block = items.map(([k,v]) =>
     `<span class="ticker-item"><b>${k}</b> <span class="up">▲</span> ${v}</span><span class="ticker-sep">|</span>`
   ).join('');
-  html = block + block; // duplicate for seamless loop
-  document.getElementById('ticker').innerHTML = html;
+  document.getElementById('ticker').innerHTML = block + block;
 })();
 
 /* ============ TYPED ROLE ============ */
@@ -934,33 +994,44 @@
   const backdrop = document.getElementById('navBackdrop');
   if (!toggle) return;
   function close() {
-    toggle.classList.remove('open'); links.classList.remove('open');
-    backdrop.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false');
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    backdrop.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
   }
   function open() {
-    toggle.classList.add('open'); links.classList.add('open');
-    backdrop.classList.add('open'); toggle.setAttribute('aria-expanded', 'true');
+    toggle.classList.add('open');
+    links.classList.add('open');
+    backdrop.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden'; // prevent background scroll
   }
-  toggle.addEventListener('click', () => {
-    links.classList.contains('open') ? close() : open();
-  });
+  toggle.addEventListener('click', () => links.classList.contains('open') ? close() : open());
   backdrop.addEventListener('click', close);
   links.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
 })();
 
-/* ============ DATA RUNNER GAME ============ */
+/* ============ DATA RUNNER GAME — FULLY RESPONSIVE ============ */
 (function () {
-  const canvas = document.getElementById('game-canvas');
-  const ctx = canvas.getContext('2d');
+  const canvasEl = document.getElementById('game-canvas');
+  const ctx = canvasEl.getContext('2d');
   const overlay = document.getElementById('overlay');
   const startBtn = document.getElementById('start-btn');
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('best');
 
+  // Virtual dimensions — game logic runs in virtual space, scaled to real canvas
   const VW = 880, VH = 240, GROUND = 200;
+
   let best = 0;
   try { best = parseInt(localStorage.getItem('dataRunnerBest') || '0') || 0; } catch (e) {}
   bestEl.textContent = best;
+
+  // Set canvas internal resolution and aspect ratio via CSS
+  canvasEl.width = VW;
+  canvasEl.height = VH;
+  // CSS: width:100% already set — this makes it scale smoothly
 
   const player = { x: 90, y: GROUND, w: 26, h: 26, vy: 0, ducking: false, onGround: true };
   let obstacles = [], bonuses = [], speed = 5, score = 0, frame = 0, running = false, gameOver = false;
@@ -972,31 +1043,27 @@
     player.y = GROUND; player.vy = 0; player.ducking = false; player.onGround = true;
     gameOver = false;
   }
-  function start() {
-    reset(); running = true; overlay.classList.add('hidden'); loop();
-  }
+  function start() { reset(); running = true; overlay.classList.add('hidden'); loop(); }
   function end() {
     running = false; gameOver = true;
-    if (score > best) { best = score; bestEl.textContent = best; try { localStorage.setItem('dataRunnerBest', String(best)); } catch (e) {} }
+    if (score > best) {
+      best = score; bestEl.textContent = best;
+      try { localStorage.setItem('dataRunnerBest', String(best)); } catch (e) {}
+    }
     overlay.classList.remove('hidden');
     overlay.querySelector('h3').textContent = 'Pipeline crashed! 💥';
     overlay.querySelector('p').innerHTML = `You processed <b style="color:var(--accent)">${score}</b> clean rows before the error.`;
     startBtn.textContent = '↻ Run Again';
   }
-  function jump() {
-    if (!running) { start(); return; }
-    if (player.onGround) { player.vy = JUMP; player.onGround = false; }
-  }
+
+  function jump() { if (!running) { start(); return; } if (player.onGround) { player.vy = JUMP; player.onGround = false; } }
   function duck(on) { player.ducking = on; }
 
   function spawn() {
     const spawnRate = Math.max(55, 95 - Math.floor(score / 80));
     if (frame % spawnRate === 0) {
       const tall = Math.random() > 0.6;
-      obstacles.push({
-        x: VW + 20, y: GROUND, w: 22 + Math.random() * 14, h: tall ? 38 : 24,
-        label: ERR_LABELS[Math.floor(Math.random() * ERR_LABELS.length)]
-      });
+      obstacles.push({ x: VW + 20, y: GROUND, w: 22 + Math.random() * 14, h: tall ? 38 : 24, label: ERR_LABELS[Math.floor(Math.random() * ERR_LABELS.length)] });
     }
     if (frame % 150 === 0 && Math.random() > 0.4) {
       bonuses.push({ x: VW + 20, y: GROUND - 70 - Math.random() * 30, r: 10, got: false });
@@ -1009,22 +1076,17 @@
 
   function update() {
     frame++;
-    score += 1; if (frame % 3 === 0) scoreEl.textContent = score;
+    score += 1;
+    if (frame % 3 === 0) scoreEl.textContent = score;
     speed += 0.0025;
-
-    // physics
     player.vy += GRAV; player.y += player.vy;
     if (player.y >= GROUND) { player.y = GROUND; player.vy = 0; player.onGround = true; }
-    const ph = player.ducking && player.onGround ? 16 : 26;
-    player.h = ph;
-
+    player.h = (player.ducking && player.onGround) ? 16 : 26;
     spawn();
-
     obstacles.forEach(o => o.x -= speed);
     bonuses.forEach(b => b.x -= speed);
     obstacles = obstacles.filter(o => o.x + o.w > -10);
     bonuses = bonuses.filter(b => b.x + b.r > -10);
-
     const pbox = { x: player.x, y: player.y, w: player.w, h: player.h };
     for (const o of obstacles) {
       if (rectHit(pbox, { x: o.x, y: o.y, w: o.w, h: o.h })) { end(); return; }
@@ -1041,10 +1103,8 @@
 
   function draw() {
     ctx.clearRect(0, 0, VW, VH);
-
     // grid floor
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
     const off = (frame * speed) % 40;
     for (let x = -off; x < VW; x += 40) {
       ctx.beginPath(); ctx.moveTo(x, GROUND + 4); ctx.lineTo(x - 18, VH); ctx.stroke();
@@ -1052,8 +1112,7 @@
     // ground line
     ctx.strokeStyle = 'rgba(0,229,160,0.5)';
     ctx.beginPath(); ctx.moveTo(0, GROUND + 4); ctx.lineTo(VW, GROUND + 4); ctx.stroke();
-
-    // bonuses (clean rows)
+    // bonuses
     bonuses.forEach(b => {
       ctx.save();
       ctx.shadowColor = 'rgba(123,97,255,0.8)'; ctx.shadowBlur = 12;
@@ -1063,8 +1122,7 @@
       ctx.fillStyle = '#fff'; ctx.font = '700 9px JetBrains Mono, monospace';
       ctx.textAlign = 'center'; ctx.fillText('+50', b.x, b.y + 3);
     });
-
-    // obstacles (errors)
+    // obstacles
     obstacles.forEach(o => {
       ctx.save();
       ctx.shadowColor = 'rgba(255,93,143,0.6)'; ctx.shadowBlur = 10;
@@ -1076,14 +1134,12 @@
       ctx.textAlign = 'center';
       ctx.fillText(o.label, o.x + o.w / 2, o.y - o.h / 2 + 3);
     });
-
-    // player (data point)
+    // player
     ctx.save();
     ctx.shadowColor = 'rgba(0,229,160,0.9)'; ctx.shadowBlur = 16;
     ctx.fillStyle = '#00e5a0';
     roundRect(player.x, player.y - player.h, player.w, player.h, 6); ctx.fill();
     ctx.restore();
-    // little face / data icon
     ctx.fillStyle = '#07070c'; ctx.font = '700 12px JetBrains Mono, monospace';
     ctx.textAlign = 'center';
     ctx.fillText('{ }', player.x + player.w / 2, player.y - player.h / 2 + 4);
@@ -1099,8 +1155,13 @@
     ctx.closePath();
   }
 
-  function loop() {
+  // Use requestAnimationFrame with timestamp for consistent speed on all devices
+  let lastTime = 0;
+  function loop(ts = 0) {
     if (!running) return;
+    // throttle to ~60fps equivalent on high-refresh screens
+    if (ts - lastTime < 14) { requestAnimationFrame(loop); return; }
+    lastTime = ts;
     update();
     if (gameOver) { draw(); return; }
     draw();
@@ -1110,19 +1171,20 @@
   // initial static frame
   draw();
 
-  // controls
+  // Keyboard controls
   startBtn.addEventListener('click', start);
   window.addEventListener('keydown', e => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
-      const inPlay = isInView();
-      if (inPlay) { e.preventDefault(); jump(); }
+      if (isInView()) { e.preventDefault(); jump(); }
     }
     if (e.code === 'ArrowDown' && running) { e.preventDefault(); duck(true); }
   });
   window.addEventListener('keyup', e => { if (e.code === 'ArrowDown') duck(false); });
-  canvas.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
 
-  // touch controls (mobile)
+  // Canvas tap/click
+  canvasEl.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
+
+  // Touch buttons
   const tJump = document.getElementById('touchJump');
   const tDuck = document.getElementById('touchDuck');
   if (tJump) {
@@ -1130,12 +1192,13 @@
   }
   if (tDuck) {
     tDuck.addEventListener('pointerdown', e => { e.preventDefault(); if (running) duck(true); });
-    tDuck.addEventListener('pointerup', e => { e.preventDefault(); duck(false); });
+    tDuck.addEventListener('pointerup', () => duck(false));
+    tDuck.addEventListener('pointercancel', () => duck(false));
     tDuck.addEventListener('pointerleave', () => duck(false));
   }
 
   function isInView() {
-    const r = canvas.getBoundingClientRect();
+    const r = canvasEl.getBoundingClientRect();
     return r.top < window.innerHeight && r.bottom > 0;
   }
 })();
